@@ -1,0 +1,60 @@
+---
+##
+consul1:
+  image: soedomoto/consul-cluster:local
+  container_name: consul1
+  hostname: consul1
+  links:
+   - consul2
+   - consul3
+  ports:
+   - "8301:8300"
+   - "8401:8400"
+   - "8501:8500"
+   - "8601:8600"
+   - "9001:9001"
+  command: /bin/consul agent -server -bootstrap -ui -client 0.0.0.0 -data-dir /opt/consul/data -disable-host-node-id  -retry-join consul2 -retry-join consul3
+
+consul2:
+  image: soedomoto/consul-cluster:local
+  container_name: consul2
+  hostname: consul2
+  ports:
+   - "8302:8300"
+   - "8402:8400"
+   - "8502:8500"
+   - "8602:8600"
+   - "9002:9001"
+  command: /bin/consul agent -server -ui -client 0.0.0.0 -data-dir /opt/consul/data -disable-host-node-id 
+
+consul3:
+  image: soedomoto/consul-cluster:local
+  container_name: consul3
+  hostname: consul3
+  ports:
+   - "8303:8300"
+   - "8403:8400"
+   - "8503:8500"
+   - "8603:8600"
+   - "9003:9001"
+  command: /bin/consul agent -server -ui -client 0.0.0.0 -data-dir /opt/consul/data -disable-host-node-id
+
+account:
+  image: soedomoto/service-account:local
+  container_name: service_account
+  hostname: service-account
+  links:
+   - consul2:consul
+  ports:
+   - "8880:80"
+  command: python /app/app.py
+
+load-balancer:
+  image: soedomoto/load-balancer:local
+  container_name: load_balancer
+  hostname: load-balancer
+  links:
+   - consul2:consul
+  ports:
+   - "80:80"
+
