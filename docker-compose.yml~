@@ -39,6 +39,16 @@ consul3:
    - "9003:9001"
   command: /bin/consul agent -server -ui -client 0.0.0.0 -data-dir /opt/consul/data -disable-host-node-id
 
+account:
+  image: soedomoto/service-account:local
+  container_name: service_account
+  hostname: service-account
+  links:
+   - consul2:consul
+  ports:
+   - "8880:80"
+  command: python /app/app.py
+
 load-balancer:
   image: soedomoto/load-balancer:local
   container_name: load_balancer
@@ -47,34 +57,4 @@ load-balancer:
    - consul2:consul
   ports:
    - "80:80"
-
-service-account-1:
-  image: soedomoto/service-account:local
-  container_name: service_account_1
-  hostname: service-account-1
-  links:
-   - consul2:consul
-  ports:
-   - "8081:80"
-  command: python /app/app.py
-
-service-account-2:
-  image: soedomoto/service-account:local
-  container_name: service_account_2
-  hostname: service-account-2
-  links:
-   - consul3:consul
-  ports:
-   - "8082:80"
-  command: python /app/app.py
-
-service-susenas-1:
-  image: soedomoto/service-susenas:local
-  container_name: service_susenas_1
-  hostname: service-susenas-1
-  links:
-   - consul2:consul
-  ports:
-   - "8083:80"
-  command: java -jar data-susenas-1.0-SNAPSHOT.jar
 
